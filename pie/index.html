@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Pie Chart from URL Params</title>
+  <meta charset="UTF-8" />
+  <title>Dynamic Pie Chart</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
@@ -11,16 +11,28 @@
       flex-direction: column;
       align-items: center;
       padding: 40px;
+      margin: 0;
+      height: 100vh;
+      box-sizing: border-box;
+    }
+    #chart-container {
+      width: 90vw;  /* 宽度最大90%视口宽 */
+      max-width: 600px; /* 最大宽度600px */
+      height: 60vh; /* 高度60%视口高 */
+      max-height: 600px; /* 最大高度600px */
     }
     canvas {
-      max-width: 400px;
-      max-height: 400px;
+      /* 让canvas充满父容器 */
+      width: 100% !important;
+      height: 100% !important;
     }
   </style>
 </head>
 <body>
-  <h2>Pie Chart</h2>
-  <canvas id="pieChart"></canvas>
+  <h2 id="chart-title">Pie Chart</h2>
+  <div id="chart-container">
+    <canvas id="pieChart"></canvas>
+  </div>
 
   <script>
     // 解析 URL 中的参数
@@ -28,17 +40,28 @@
       const params = new URLSearchParams(window.location.search);
       const result = {};
       for (const [key, value] of params.entries()) {
-        result[decodeURIComponent(key)] = parseFloat(value);
+        // 只处理数值型参数
+        const num = parseFloat(value);
+        if (!isNaN(num)) {
+          result[decodeURIComponent(key)] = num;
+        }
       }
       return result;
     }
 
-    // 获取数据
     const dataFromUrl = getQueryParams();
     const labels = Object.keys(dataFromUrl);
     const values = Object.values(dataFromUrl);
 
-    // 随机颜色生成器
+    // 设置标题为第一个参数名，如果没有参数，则默认标题
+    const titleElement = document.getElementById('chart-title');
+    if (labels.length > 0) {
+      titleElement.textContent = labels[0];
+    } else {
+      titleElement.textContent = 'Pie Chart (No data)';
+    }
+
+    // 生成随机颜色
     const colors = labels.map(() =>
       `hsl(${Math.floor(Math.random() * 360)}, 70%, 60%)`
     );
@@ -50,14 +73,18 @@
         labels: labels,
         datasets: [{
           data: values,
-          backgroundColor: colors
+          backgroundColor: colors,
         }]
       },
       options: {
-        responsive: true,
+        responsive: true,   // 开启响应式
+        maintainAspectRatio: false, // 关闭默认长宽比限制，使canvas跟父容器大小同步
         plugins: {
           legend: {
             position: 'bottom'
+          },
+          title: {
+            display: false // 因为用外部h2显示标题了，这里隐藏
           }
         }
       }
