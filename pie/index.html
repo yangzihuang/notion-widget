@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pie Chart from URL Params</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+    }
+    canvas {
+      max-width: 400px;
+      max-height: 400px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Pie Chart</h2>
+  <canvas id="pieChart"></canvas>
+
+  <script>
+    // 解析 URL 中的参数
+    function getQueryParams() {
+      const params = new URLSearchParams(window.location.search);
+      const result = {};
+      for (const [key, value] of params.entries()) {
+        result[decodeURIComponent(key)] = parseFloat(value);
+      }
+      return result;
+    }
+
+    // 获取数据
+    const dataFromUrl = getQueryParams();
+    const labels = Object.keys(dataFromUrl);
+    const values = Object.values(dataFromUrl);
+
+    // 随机颜色生成器
+    const colors = labels.map(() =>
+      `hsl(${Math.floor(Math.random() * 360)}, 70%, 60%)`
+    );
+
+    // 创建饼图
+    new Chart(document.getElementById('pieChart'), {
+      type: 'pie',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: values,
+          backgroundColor: colors
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
